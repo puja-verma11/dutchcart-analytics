@@ -1,0 +1,207 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: "One row per order, unpacked from RAW.ORDERS, with data quality flags"
+    columns:
+      - name: order_id
+        description: "Unique order number"
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["paid", "payment_failed"]
+      - name: device
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["mobile", "desktop", "tablet"]
+
+  - name: stg_order_items
+    description: "One row per product inside an order"
+    columns:
+      - name: order_id
+        description: "Order this item belongs to (repeats per item)"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: product_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+      - name: unit_price
+        data_tests:
+          - not_null
+      - name: quantity
+        data_tests:
+          - not_null
+
+  - name: stg_products
+    description: "One row per product in the catalogue"
+    columns:
+      - name: product_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_customers
+    description: "One row per customer"
+    columns:
+      - name: customer_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_payments
+    description: "payment for each order"
+    columns:
+      - name: payment_id
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: payment_method
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["ideal", "klarna", "card", "paypal"]
+      - name: payment_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["success", "failed"]
+  - name: stg_shipments
+    description: "One row per shipped order"
+    columns:
+      - name: shipment_id
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: carrier
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["PostNL", "DHL", "DPD"]
+  - name: stg_returns
+    description: "One row per returned product"
+    columns:
+      - name: return_id
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: product_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+      - name: return_reason
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["size_too_small", "size_too_big", "not_as_pictured", "damaged", "changed_mind", "late_delivery"]
+  - name: stg_reviews
+    description: "One row per customer review (1 to 5 stars)"
+    columns:
+      - name: review_id
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: stars
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+  - name: stg_web_events
+    description: "One row per website event, duplicates removed"
+    columns:
+      - name: event_id
+        data_tests:
+          - unique
+          - not_null
+      - name: event_name
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["page_view", "add_to_cart", "begin_checkout", "purchase"]
+      - name: channel
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["organic", "google_ads", "instagram", "email", "affiliate", "tiktok"]
+      - name: device
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["mobile", "desktop", "tablet"]
+
+  - name: stg_inventory_snapshots
+    description: "One row per product per day with stock level"
+    columns:
+      - name: snapshot_id
+        data_tests:
+          - unique
+          - not_null
+      - name: product_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+
+  - name: stg_marketing_spend
+    description: "One row per channel per day with ad spend"
+    columns:
+      - name: spend_id
+        data_tests:
+          - unique
+          - not_null
+      - name: channel
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["google_ads", "instagram", "tiktok", "affiliate", "email", "tv", "radio"]
+      - name: spend_eur
+        data_tests:
+          - not_null

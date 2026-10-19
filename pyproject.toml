@@ -1,0 +1,11 @@
+[project]
+name = "dutchcart-analytics"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "dbt-core>=1.12.6",
+    "dbt-snowflake>=1.12.3",
+    "faker>=40.43.0",
+    "python-dotenv>=1.2.4",
+    "snowflake-connector-python>=4.8.0",
+]

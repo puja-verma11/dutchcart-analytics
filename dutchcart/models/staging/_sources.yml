@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: raw
+    database: DUTCHCART
+    schema: RAW
+    tables:
+      - name: orders
+      - name: order_items
+      - name: products
+      - name: customers
+      - name: payments
+      - name: shipments
+      - name: returns
+      - name: reviews
+      - name: web_events
+      - name: inventory_snapshots
+      - name: marketing_spend

@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: "One row per order with items, delivery, return and review info"
+    columns:
+      - name: order_id
+        description: "Unique order. If this test fails, a join caused fan-out"
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        data_tests:
+          - not_null
+      - name: net_revenue
+        data_tests:
+          - not_null
+  - name: dim_customers
+    description: "One row per customer with lifetime orders, revenue and segment"
+    columns:
+      - name: customer_id
+        description: "Unique customer. If this fails, a join duplicated customers"
+        data_tests:
+          - unique
+          - not_null
+      - name: value_segment
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["high", "medium", "low"]
