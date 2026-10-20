@@ -28,3 +28,23 @@ models:
           - accepted_values:
               arguments:
                 values: ["high", "medium", "low"]
+  - name: dim_products
+    columns:
+      - name: product_id
+        data_tests: [unique, not_null]
+
+  - name: fct_order_items
+    columns:
+      - name: order_item_id
+        data_tests: [unique, not_null]
+      - name: product_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_id
+
+  - name: dim_date
+    columns:
+      - name: date_day
+        data_tests: [unique, not_null]
