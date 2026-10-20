@@ -5,3 +5,5 @@ __pycache__/
 .DS_Store
 *.p8
 logs/
+*.duckdb
+*.duckdb.wal

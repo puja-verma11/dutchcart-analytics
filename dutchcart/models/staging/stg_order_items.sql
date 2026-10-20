@@ -5,15 +5,14 @@ with source as (
 renamed as (
 
     select
-        record:order_id::string                           as order_id,
-        record:product_id::string                         as product_id,
-        record:quantity::int                              as quantity,
+        {{ json_field('order_id', 'string') }}      as order_id,
+        {{ json_field('product_id', 'string') }}    as product_id,
+        {{ json_field('quantity', 'int') }}         as quantity,
         -- text price -> remove €, swap Dutch comma for a dot, make it a number
-        try_to_number(
-            replace(replace(record:unit_price::string, '€', ''), ',', '.'),
-            10, 2
-        )                                                 as unit_price,
-        typeof(record:unit_price) = 'VARCHAR'             as was_price_text,
+        {{ safe_to_decimal(
+            "replace(replace(" ~ json_field('unit_price', 'string') ~ ", '€', ''), ',', '.')"
+        ) }}                                        as unit_price,
+        {{ json_field_is_text('unit_price') }}      as was_price_text,
         file_name,
         loaded_at
     from source

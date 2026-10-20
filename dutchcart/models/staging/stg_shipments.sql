@@ -4,12 +4,12 @@ with source as (
 
 renamed as (
     select
-        record:shipment_id::string       as shipment_id,
-        record:order_id::string          as order_id,
-        record:carrier::string           as carrier,
-        record:shipped_ts::timestamp     as shipped_at,
-        record:promised_date::date       as promised_date,
-        record:delivered_date::date      as delivered_date,
+        {{ json_field('shipment_id', 'string') }}       as shipment_id,
+        {{ json_field('order_id', 'string') }}          as order_id,
+        {{ json_field('carrier', 'string') }}           as carrier,
+        {{ json_field('shipped_ts', 'timestamp') }}     as shipped_at,
+        {{ json_field('promised_date', 'date') }}       as promised_date,
+        {{ json_field('delivered_date', 'date') }}      as delivered_date,
         file_name,
         loaded_at
     from source

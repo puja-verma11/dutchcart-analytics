@@ -15,7 +15,7 @@ returns as (
 )
 
 select
-    i.order_id || '-' || row_number() over (partition by i.order_id order by i.product_id)  as order_item_id,
+    i.order_id || '-' || cast(row_number() over (partition by i.order_id order by i.product_id) as varchar)  as order_item_id,
     i.order_id,
     i.product_id,
     o.customer_id,

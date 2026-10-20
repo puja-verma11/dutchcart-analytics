@@ -4,12 +4,12 @@ with source as (
 
 unpacked_to_stg as (
     select
-        record:payment_id::string        as payment_id,
-        record:order_id::string          as order_id,
-        record:method::string            as payment_method,
-        record:amount::number(10,2)      as amount,
-        record:status::string            as payment_status,
-        record:payment_ts::timestamp     as paid_at,
+        {{ json_field('payment_id', 'string') }}        as payment_id,
+        {{ json_field('order_id', 'string') }}          as order_id,
+        {{ json_field('method', 'string') }}            as payment_method,
+        {{ json_field('amount', 'number(10,2)') }}      as amount,
+        {{ json_field('status', 'string') }}            as payment_status,
+        {{ json_field('payment_ts', 'timestamp') }}     as paid_at,
         file_name,
         loaded_at
     from source

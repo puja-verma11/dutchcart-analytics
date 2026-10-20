@@ -4,11 +4,11 @@ with source as (
 
 renamed as (
     select
-        record:return_id::string       as return_id,
-        record:order_id::string        as order_id,
-        record:product_id::string      as product_id,
-        record:reason::string          as return_reason,
-        record:return_ts::timestamp    as returned_at,
+        {{ json_field('return_id', 'string') }}       as return_id,
+        {{ json_field('order_id', 'string') }}        as order_id,
+        {{ json_field('product_id', 'string') }}      as product_id,
+        {{ json_field('reason', 'string') }}          as return_reason,
+        {{ json_field('return_ts', 'timestamp') }}    as returned_at,
         file_name,
         loaded_at
     from source
