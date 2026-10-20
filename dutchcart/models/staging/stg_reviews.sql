@@ -4,10 +4,10 @@ with source as (
 
 renamed as (
     select
-        record:review_id::string       as review_id,
-        record:order_id::string        as order_id,
-        record:stars::int              as stars,
-        record:review_ts::timestamp    as reviewed_at,
+        {{ json_field('review_id', 'string') }}       as review_id,
+        {{ json_field('order_id', 'string') }}        as order_id,
+        {{ json_field('stars', 'int') }}              as stars,
+        {{ json_field('review_ts', 'timestamp') }}    as reviewed_at,
         file_name,
         loaded_at
     from source

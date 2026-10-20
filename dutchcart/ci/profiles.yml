@@ -21,3 +21,8 @@ dutchcart:
       database: DUTCHCART
       schema: STAGING
       threads: 4
+    duckdb:
+      type: duckdb
+      path: ../dutchcart.duckdb
+      schema: STAGING
+      threads: 4
