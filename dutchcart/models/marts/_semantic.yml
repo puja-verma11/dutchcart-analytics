@@ -1,0 +1,197 @@
+# Semantic layer: business metrics defined ONCE, in plain YAML.
+# Any tool (the mf command, a dashboard, an AI assistant) asks for "revenue by month"
+# and MetricFlow writes the SQL, always the same way.
+
+semantic_models:
+
+  - name: orders
+    description: "One row per order (fct_orders)"
+    model: ref('fct_orders')
+    defaults:
+      agg_time_dimension: order_date
+    entities:
+      - name: order
+        type: primary
+        expr: order_id
+      - name: customer
+        type: foreign
+        expr: customer_id
+    dimensions:
+      - name: order_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: channel
+        type: categorical
+      - name: device
+        type: categorical
+      - name: carrier
+        type: categorical
+      - name: is_late
+        type: categorical
+    measures:
+      - name: paid_revenue
+        description: "Net revenue of paid orders (after discount, without shipping)"
+        agg: sum
+        expr: case when is_paid then net_revenue else 0 end
+      - name: paid_orders
+        agg: sum
+        expr: case when is_paid then 1 else 0 end
+      - name: shipped_orders
+        agg: sum
+        expr: case when is_late is not null then 1 else 0 end
+      - name: late_orders
+        agg: sum
+        expr: case when is_late then 1 else 0 end
+      - name: orders_with_return
+        agg: sum
+        expr: case when has_return then 1 else 0 end
+
+  - name: marketing_days
+    description: "One row per channel per day (fct_marketing_daily)"
+    model: ref('fct_marketing_daily')
+    defaults:
+      agg_time_dimension: activity_date
+    entities:
+      - name: marketing_day
+        type: primary
+        expr: marketing_day_id
+    dimensions:
+      - name: activity_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: channel
+        type: categorical
+      - name: is_offline
+        type: categorical
+    measures:
+      - name: ad_spend
+        description: "Money spent on ads (EUR)"
+        agg: sum
+        expr: spend_eur
+      - name: channel_revenue
+        description: "Paid revenue credited to the channel"
+        agg: sum
+        expr: revenue
+
+  - name: order_items
+    description: "One row per product in a paid order (fct_order_items)"
+    model: ref('fct_order_items')
+    defaults:
+      agg_time_dimension: order_date
+    entities:
+      - name: order_item
+        type: primary
+        expr: order_item_id
+      - name: product
+        type: foreign
+        expr: product_id
+    dimensions:
+      - name: order_date
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: items_sold
+        agg: count
+        expr: order_item_id
+      - name: items_returned
+        agg: sum
+        expr: case when is_returned then 1 else 0 end
+
+  - name: products
+    model: ref('dim_products')
+    entities:
+      - name: product
+        type: primary
+        expr: product_id
+    dimensions:
+      - name: category
+        type: categorical
+
+metrics:
+
+  - name: revenue
+    label: "Revenue"
+    description: "Net revenue of paid orders"
+    type: simple
+    type_params:
+      measure: paid_revenue
+
+  - name: orders
+    label: "Orders"
+    description: "Number of paid orders"
+    type: simple
+    type_params:
+      measure: paid_orders
+
+  - name: aov
+    label: "Average order value"
+    description: "Revenue / paid orders"
+    type: ratio
+    type_params:
+      numerator: revenue
+      denominator: orders
+
+  - name: late_delivery_rate
+    label: "Late delivery rate"
+    description: "Share of shipped orders that arrived after the promised date"
+    type: ratio
+    type_params:
+      numerator:
+        name: late_orders
+      denominator:
+        name: shipped_orders
+
+  - name: late_orders
+    label: "Late orders"
+    type: simple
+    type_params:
+      measure: late_orders
+
+  - name: shipped_orders
+    label: "Shipped orders"
+    type: simple
+    type_params:
+      measure: shipped_orders
+
+  - name: ad_spend
+    label: "Ad spend"
+    type: simple
+    type_params:
+      measure: ad_spend
+
+  - name: channel_revenue
+    label: "Channel revenue"
+    type: simple
+    type_params:
+      measure: channel_revenue
+
+  - name: roas
+    label: "ROAS"
+    description: "Return on ad spend: channel revenue / ad spend"
+    type: ratio
+    type_params:
+      numerator: channel_revenue
+      denominator: ad_spend
+
+  - name: items_sold
+    label: "Items sold"
+    type: simple
+    type_params:
+      measure: items_sold
+
+  - name: items_returned
+    label: "Items returned"
+    type: simple
+    type_params:
+      measure: items_returned
+
+  - name: return_rate
+    label: "Return rate"
+    description: "Share of sold items that were returned"
+    type: ratio
+    type_params:
+      numerator: items_returned
+      denominator: items_sold

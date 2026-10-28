@@ -45,6 +45,10 @@ models:
                 field: product_id
 
   - name: dim_date
+    description: "Calendar: one row per day. Also the time spine for the semantic layer."
+    time_spine:
+      standard_granularity_column: date_day
     columns:
       - name: date_day
+        granularity: day
         data_tests: [unique, not_null]
